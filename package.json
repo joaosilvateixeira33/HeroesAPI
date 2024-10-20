@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index.js"
+    "dev": "nodemon --watch --clear index.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,8 @@
   "dependencies": {
     "express": "^4.21.1",
     "mongodb": "^6.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
