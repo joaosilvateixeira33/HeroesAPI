@@ -1,10 +1,15 @@
 import { initializeDatabase, db } from './src/repository/db.js';
 import express from 'express';
-import { ObjectId } from 'mongodb'; // Importando ObjectId
-import bodyParser from 'body-parser'; // Middleware para parsing do corpo da requisição
+import { ObjectId } from 'mongodb';
+import bodyParser from 'body-parser';
+import Ajv from 'ajv';
+import { personagemSchema } from './src/schemas/personagemSchema.js';
 
 const app = express();
 const port = 3000;
+
+const ajv = new Ajv();
+const validate = ajv.compile(personagemSchema);
 
 app.use(bodyParser.json());
 
@@ -29,6 +34,11 @@ app.get('/personagens', async (req, res) => {
 
 app.post('/personagens', async (req, res) => {
     const novoPersonagem = req.body;
+
+    const valid = validate(novoPersonagem);
+    if (!valid) {
+      return res.status(400).json({ errors: validate.errors });
+    }
 
     try {
         const result = await db.collection('Characters').insertOne(novoPersonagem); // Usando a variável db
