@@ -26,12 +26,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/personagens', async (req, res) => {
-  try {
-    const persons = await db.collection('Characters').find().project({ _id: 0 }).toArray(); // Projeção para excluir _id
-    res.json(persons);
-  } catch (error) {
-    res.status(500).send('Erro ao buscar personagens');
-  }
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const personagens = await db.collection('Characters')
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+  res.status(200).json(personagens);
 });
 
 app.post('/personagens', async (req, res) => {
@@ -56,7 +61,7 @@ app.get('/personagens/:nickname', async (req, res) => {
   try {
     const personagem = await db.collection('Characters').findOne(
       { nickname },
-      { projection: { _id: 0 } } // Projeção para excluir _id
+      { projection: { _id: 0 } }
     );
     if (!personagem) {
       return res.status(404).send('Personagem não encontrado');
@@ -66,6 +71,17 @@ app.get('/personagens/:nickname', async (req, res) => {
     res.status(500).send('Erro ao buscar personagem');
   }
 });
+
+app.delete(('/personagens/:nickname', async (req, res)=>{
+  const { nickname } = req.params;
+  const result = await db.collection('Characters').deleteOne({ nickname });
+  if (result.deletedCount === 1) {
+    res.status(200).send({ message: 'Personagem removido com sucesso!' });
+  } else {
+        res.status(404).send({ message: 'Personagem não encontrado!' });
+    }
+}));
+
 
 app.listen(port, () => {
   console.log(`App listening on http://localhost:${port}`);
