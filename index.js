@@ -72,15 +72,15 @@ app.get('/personagens/:nickname', async (req, res) => {
   }
 });
 
-app.delete(('/personagens/:nickname', async (req, res)=>{
+app.delete('/personagens/:nickname', async (req, res) => {
   const { nickname } = req.params;
   const result = await db.collection('Characters').deleteOne({ nickname });
   if (result.deletedCount === 1) {
-    res.status(200).send({ message: 'Personagem removido com sucesso!' });
+      res.status(200).send({ message: 'Personagem removido com sucesso!' });
   } else {
-        res.status(404).send({ message: 'Personagem não encontrado!' });
-    }
-}));
+      res.status(404).send({ message: 'Personagem não encontrado!' });
+  }
+});
 
 
 app.listen(port, () => {
