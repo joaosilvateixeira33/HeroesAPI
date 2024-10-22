@@ -1,6 +1,5 @@
 import { initializeDatabase, db } from './src/repository/db.js';
 import express from 'express';
-import { ObjectId } from 'mongodb';
 import bodyParser from 'body-parser';
 import Ajv from 'ajv';
 import { personagemSchema } from './src/schemas/personagemSchema.js';
@@ -13,8 +12,11 @@ const validate = ajv.compile(personagemSchema);
 
 app.use(bodyParser.json());
 
-initializeDatabase().then(() => {
+initializeDatabase().then(async () => {
   console.log('Database initialized');
+  
+  // Indexando o campo 'nickname' para otimizar buscas
+  await db.collection('Characters').createIndex({ nickname: 1 });
 }).catch(err => {
   console.error('Database initialization failed:', err);
 });
@@ -24,42 +26,45 @@ app.get('/', (req, res) => {
 });
 
 app.get('/personagens', async (req, res) => {
-    try {
-        const persons = await db.collection('Characters').find().toArray(); // Usando a variável db
-        res.json(persons);
-    } catch (error) {
-        res.status(500).send('Erro ao buscar personagens');
-    }
+  try {
+    const persons = await db.collection('Characters').find().project({ _id: 0 }).toArray(); // Projeção para excluir _id
+    res.json(persons);
+  } catch (error) {
+    res.status(500).send('Erro ao buscar personagens');
+  }
 });
 
 app.post('/personagens', async (req, res) => {
-    const novoPersonagem = req.body;
+  const novoPersonagem = req.body;
 
-    const valid = validate(novoPersonagem);
-    if (!valid) {
-      return res.status(400).json({ errors: validate.errors });
-    }
+  const valid = validate(novoPersonagem);
+  if (!valid) {
+    return res.status(400).json({ errors: validate.errors });
+  }
 
-    try {
-        const result = await db.collection('Characters').insertOne(novoPersonagem); // Usando a variável db
-        res.status(201).json({ id: result.insertedId, ...novoPersonagem });
-    } catch (error) {
-        res.status(500).send('Erro ao criar personagem');
-    }
+  try {
+    const result = await db.collection('Characters').insertOne(novoPersonagem);
+    res.status(201).json({ id: result.insertedId, ...novoPersonagem });
+  } catch (error) {
+    res.status(500).send('Erro ao criar personagem');
+  }
 });
 
-app.get('/personagens/:id', async (req, res) => {
-    const id = req.params.id;
+app.get('/personagens/:nickname', async (req, res) => {
+  const { nickname } = req.params;
 
-    try {
-        const personagem = await db.collection('Characters').findOne({ _id: ObjectId(id) }); // Usando a variável db
-        if (!personagem) {
-            return res.status(404).send('Personagem não encontrado');
-        }
-        res.json(personagem);
-    } catch (error) {
-        res.status(500).send('Erro ao buscar personagem');
+  try {
+    const personagem = await db.collection('Characters').findOne(
+      { nickname },
+      { projection: { _id: 0 } } // Projeção para excluir _id
+    );
+    if (!personagem) {
+      return res.status(404).send('Personagem não encontrado');
     }
+    res.json(personagem);
+  } catch (error) {
+    res.status(500).send('Erro ao buscar personagem');
+  }
 });
 
 app.listen(port, () => {

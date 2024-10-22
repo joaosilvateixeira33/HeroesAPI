@@ -1,1 +1,1 @@
-export const DATABASE_NAME = 'DCPersons';
+export const DATABASE_NAME = 'DCHeroes';
