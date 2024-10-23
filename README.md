@@ -14,7 +14,6 @@
 
 <h2 id="technologies">💻 Technologies</h2>
 
-- list of all technologies you used
 - Javascript
 - MongoDB
 - NodeJS
@@ -59,12 +58,13 @@ Here you can list the main routes of your API, and what are their expected reque
 ​
 | route               | description                                          
 |----------------------|-----------------------------------------------------
-| <kbd>GET /personagens</kbd>              | Retorna todos os Herois cadastrados
-| <kbd>GET /personagens/nickname</kbd>     | Retorna apenas o heroi com o nickname especificado
-| <kbd>POST /personagens/</kbd>            | Adiciona atraves do corpo da requisição as informações do personagem
-| <kbd>PATCH /personagens/nickaname        | Atualiza atraves do corpo da requisição as informações do personagem
+| <kbd>GET /personagens</kbd>              | Retorna todos os Herois cadastrados [response details](#get-person-detail)
+| <kbd>GET /personagens/nickname</kbd>     | Retorna apenas o heroi com o nickname especificado [response details](#get-one-person-detail)
+| <kbd>POST /personagens/</kbd>            | Adiciona atraves do corpo da requisição as informações do personagem [response details](#post-person-detail)
+| <kbd>PATCH /personagens/nickaname        | Atualiza atraves do corpo da requisição as informações do personagem [response details](#patch-person-detail)
+| <kbd>DELETE /personagens/nickname        | Remove atarvés do nickname o personagem no banco de dados [response details](#delete-person-detail)
 
-<h3 id="get-auth-detail">GET /personagens</h3>
+<h3 id="get-person-detail">GET /personagens</h3>
 
 **RESPONSE**
 ```json
@@ -77,7 +77,7 @@ Here you can list the main routes of your API, and what are their expected reque
 ]
 ```
 
-<h3 id="post-auth-detail">POST /personagens</h3>
+<h3 id="post-person-detail">POST /personagens</h3>
 
 **REQUEST**
 ```json
@@ -87,7 +87,7 @@ Here you can list the main routes of your API, and what are their expected reque
   "description": "Bilionário e filantropo de Gotham City, que combate o crime usando suas habilidades em artes marciais e tecnologia avançada, além de sua inteligência."
 }
 ```
-<h3 id="post-auth-detail">GET /personagens/Batman</h3>
+<h3 id="get-one-person-detail">GET /personagens/Batman</h3>
 
 **RESPONSE**
 ```json
@@ -97,7 +97,7 @@ Here you can list the main routes of your API, and what are their expected reque
     "description": "Bilionário e filantropo de Gotham City, que combate o crime usando suas habilidades em artes marciais e tecnologia avançada, além de sua inteligência."
 }
 ```
-<h3 id="post-auth-detail">PATCH /personagens/Batman</h3>
+<h3 id="patch-person-detail">PATCH /personagens/Batman</h3>
 
 **REQUEST**
 ```json
@@ -115,7 +115,7 @@ Here you can list the main routes of your API, and what are their expected reque
 }
 ```
 
-<h3 id="post-auth-detail">DELETE /personagens/Batman</h3>
+<h3 id="delete-person-detail">DELETE /personagens/Batman</h3>
 
 **RESPONSE**
 ```json
