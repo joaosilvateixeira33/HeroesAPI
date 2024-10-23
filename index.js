@@ -2,20 +2,19 @@ import { initializeDatabase, db } from './src/repository/db.js';
 import express from 'express';
 import bodyParser from 'body-parser';
 import Ajv from 'ajv';
-import { personagemSchema } from './src/schemas/personagemSchema.js';
+import { personagemSchema, updatePersonagemSchema} from './src/schemas/personagemSchema.js';
 
 const app = express();
 const port = 3000;
 
 const ajv = new Ajv();
 const validate = ajv.compile(personagemSchema);
+const validateUpdate = ajv.compile(updatePersonagemSchema);
 
 app.use(bodyParser.json());
 
 initializeDatabase().then(async () => {
   console.log('Database initialized');
-  
-  // Indexando o campo 'nickname' para otimizar buscas
   await db.collection('Characters').createIndex({ nickname: 1 });
 }).catch(err => {
   console.error('Database initialization failed:', err);
@@ -31,10 +30,10 @@ app.get('/personagens', async (req, res) => {
   const skip = (page - 1) * limit;
 
   const personagens = await db.collection('Characters')
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .toArray();
+    .find()
+    .skip(skip)
+    .limit(limit)
+    .toArray();
 
   res.status(200).json(personagens);
 });
@@ -76,12 +75,36 @@ app.delete('/personagens/:nickname', async (req, res) => {
   const { nickname } = req.params;
   const result = await db.collection('Characters').deleteOne({ nickname });
   if (result.deletedCount === 1) {
-      res.status(200).send({ message: 'Personagem removido com sucesso!' });
+    res.status(200).send({ message: 'Personagem removido com sucesso!' });
   } else {
-      res.status(404).send({ message: 'Personagem não encontrado!' });
+    res.status(404).send({ message: 'Personagem não encontrado!' });
   }
 });
 
+app.patch('/personagens/:nickname', async (req, res) => {
+  const { nickname } = req.params;
+  const updateData = req.body;
+
+  const isValid = validateUpdate(updateData);
+  if (!isValid) {
+    return res.status(400).json({ errors: validate.errors });
+  }
+
+  try {
+    const result = await db.collection('Characters').updateOne(
+      { nickname },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Personagem não encontrado' });
+    }
+
+    res.json({ message: 'Personagem atualizado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao atualizar personagem' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`App listening on http://localhost:${port}`);
